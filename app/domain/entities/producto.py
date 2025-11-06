@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from datetime import datetime
 
 
@@ -6,17 +7,17 @@ class Producto:
     Entidad del dominio que representa un producto del inventario.
 
     RESPONSABILIDADES:
-    - Mantener la identidad del producto (SKU único)
+    - Mantener la identidad del producto (SKU unico)
     - Validar reglas de negocio relacionadas con el producto
     - Encapsular los datos del producto
 
     REGLAS DE NEGOCIO APLICADAS:
-    - RN1: SKU debe ser único (validado en el caso de uso)
+    - RN1: SKU debe ser unico (validado en el caso de uso)
     - RN2: Stock no puede ser negativo
     - RN5: Productos inactivos no se pueden mover ni vender
 
     PRINCIPIOS SOLID:
-    - SRP: Esta clase solo se encarga de la lógica de negocio del Producto
+    - SRP: Esta clase solo se encarga de la logica de negocio del Producto
     - OCP: Podemos extenderla sin modificarla
     """
 
@@ -39,18 +40,18 @@ class Producto:
         Constructor de la entidad Producto.
 
         Args:
-            sku: Código SKU único del producto
+            sku: Codigo SKU unico del producto
             nombre: Nombre del producto
             tipo_licor: Tipo de licor (Ron, Whisky, Vodka, etc.)
-            presentacion: Presentación del producto (Botella 750ml, etc.)
+            presentacion: Presentacion del producto (Botella 750ml, etc.)
             proveedor: Nombre del proveedor
             precio_compra: Precio al que se compra el producto
             precio_venta: Precio al que se vende el producto
             stock: Cantidad disponible en inventario
             estado: Estado del producto (Activo/Inactivo)
             id: ID del producto (asignado por la BD)
-            fecha_creacion: Fecha de creación del registro
-            fecha_actualizacion: Fecha de última actualización
+            fecha_creacion: Fecha de creacion del registro
+            fecha_actualizacion: Fecha de ultima actualizacion
         """
         self.id = id
         self.sku = sku
@@ -69,7 +70,7 @@ class Producto:
         """
         Valida la regla de negocio RN2: Stock no negativo.
 
-        Esta validación asegura que nunca tengamos stock negativo,
+        Esta validacion asegura que nunca tengamos stock negativo,
         lo cual no tiene sentido en el mundo real.
 
         Raises:
@@ -89,7 +90,7 @@ class Producto:
         Los precios deben ser positivos para tener sentido comercial.
 
         Raises:
-            ValueError: Si algún precio es inválido
+            ValueError: Si algun precio es invalido
 
         Ejemplo:
             producto.precio_compra = 0
@@ -133,7 +134,7 @@ class Producto:
         """
         Actualiza el stock validando que no sea negativo.
 
-        Este método encapsula la lógica de actualización de stock
+        Este metodo encapsula la logica de actualizacion de stock
         garantizando que se cumpla la regla RN2.
 
         Args:
@@ -152,10 +153,10 @@ class Producto:
 
     def esta_activo(self) -> bool:
         """
-        Verifica si el producto está activo.
+        Verifica si el producto esta activo.
 
         Returns:
-            True si el producto está activo, False en caso contrario
+            True si el producto esta activo, False en caso contrario
 
         Ejemplo:
             if producto.esta_activo():
@@ -165,10 +166,10 @@ class Producto:
 
     def __repr__(self) -> str:
         """
-        Representación en string del producto (útil para debugging).
+        Representacion en string del producto (util para debugging).
 
         Returns:
-            String con la representación del producto
+            String con la representacion del producto
 
         Ejemplo:
             print(producto)  # Producto(SKU: RON001, Nombre: Ron Viejo...)

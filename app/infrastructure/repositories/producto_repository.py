@@ -1,52 +1,76 @@
-from sqlalchemy.orm import Session
+from sqlmodel import Session, select
 from app.domain.entities.producto import Producto
 from app.domain.ports.producto_repo_port import ProductoRepoPort
 from app.infrastructure.db.models import ProductoModel
 
 
 class ProductoRepository(ProductoRepoPort):
-    """Adaptador que implementa el puerto ProductoRepoPort usando SQLAlchemy."""
+    """Adaptador que implementa el puerto ProductoRepoPort usando SQLModel."""
 
     def __init__(self, db: Session):
         self.db = db
 
     def guardar(self, producto: Producto) -> Producto:
-        existente = self.db.query(ProductoModel).filter_by(sku=producto.sku).first()
+        statement = select(ProductoModel).where(ProductoModel.sku == producto.sku)
+        existente = self.db.exec(statement).first()
         if existente:
-            raise ValueError("El SKU ya existe")
+            raise ValueError("El SKU ya existe (RN1)")
 
-        model = ProductoModel(**producto.__dict__)
+        model = ProductoModel(
+            sku=producto.sku,
+            nombre=producto.nombre,
+            tipo_licor=producto.tipo_licor,
+            presentacion=producto.presentacion,
+            proveedor=producto.proveedor,
+            precio_compra=producto.precio_compra,
+            precio_venta=producto.precio_venta,
+            stock=producto.stock,
+            estado=producto.estado,
+            fecha_creacion=producto.fecha_creacion,
+            fecha_actualizacion=producto.fecha_actualizacion
+        )
         self.db.add(model)
         self.db.commit()
         self.db.refresh(model)
         return model.to_entity()
 
     def actualizar(self, producto: Producto) -> Producto:
-        model = self.db.query(ProductoModel).filter_by(id=producto.id).first()
+        model = self.db.get(ProductoModel, producto.id)
         if not model:
             raise ValueError("Producto no encontrado")
 
-        for key, value in producto.__dict__.items():
-            setattr(model, key, value)
+        model.nombre = producto.nombre
+        model.tipo_licor = producto.tipo_licor
+        model.presentacion = producto.presentacion
+        model.proveedor = producto.proveedor
+        model.precio_compra = producto.precio_compra
+        model.precio_venta = producto.precio_venta
+        model.stock = producto.stock
+        model.estado = producto.estado
+        model.fecha_actualizacion = producto.fecha_actualizacion
 
+        self.db.add(model)
         self.db.commit()
         self.db.refresh(model)
         return model.to_entity()
 
     def obtener_por_id(self, id: int) -> Producto | None:
-        model = self.db.query(ProductoModel).filter_by(id=id).first()
+        model = self.db.get(ProductoModel, id)
         return model.to_entity() if model else None
 
     def obtener_por_sku(self, sku: str) -> Producto | None:
-        model = self.db.query(ProductoModel).filter_by(sku=sku).first()
+        statement = select(ProductoModel).where(ProductoModel.sku == sku)
+        model = self.db.exec(statement).first()
         return model.to_entity() if model else None
 
     def listar_todos(self) -> list[Producto]:
         """Retorna todos los productos (activos e inactivos)."""
-        models = self.db.query(ProductoModel).all()
+        statement = select(ProductoModel)
+        models = self.db.exec(statement).all()
         return [m.to_entity() for m in models]
 
     def listar_activos(self) -> list[Producto]:
         """Retorna solo los productos activos."""
-        models = self.db.query(ProductoModel).filter_by(activo=True).all()
+        statement = select(ProductoModel).where(ProductoModel.estado == "Activo")
+        models = self.db.exec(statement).all()
         return [m.to_entity() for m in models]

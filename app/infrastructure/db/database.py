@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from sqlmodel import create_engine, Session, SQLModel
 from app.config.settings import settings
 
@@ -16,13 +17,14 @@ def create_db_and_tables():
     - Inicializar el esquema de la base de datos
     - Crear tablas basadas en los modelos SQLModel
 
-    CUÁNDO SE EJECUTA:
-    - Al iniciar la aplicación (evento startup de FastAPI)
+    CUANDO SE EJECUTA:
+    - Al iniciar la aplicacion (evento startup de FastAPI)
     - Solo crea tablas si no existen
 
     Ejemplo:
         create_db_and_tables()  # Crea tabla 'productos' si no existe
     """
+    from app.infrastructure.db.models import ProductoModel, MovimientoInventarioModel
     SQLModel.metadata.create_all(engine)
 
 
@@ -31,14 +33,14 @@ def get_session():
     Generador de sesiones de base de datos.
 
     RESPONSABILIDAD:
-    - Proporcionar una sesión de BD por request
-    - Garantizar que la sesión se cierre correctamente
+    - Proporcionar una sesion de BD por request
+    - Garantizar que la sesion se cierre correctamente
 
     USO EN FASTAPI:
-    - Se usa con Depends() para inyección de dependencias
-    - Cada endpoint recibe su propia sesión
+    - Se usa con Depends() para inyeccion de dependencias
+    - Cada endpoint recibe su propia sesion
 
-    PATRÓN:
+    PATRON:
     - Context Manager (with statement)
     - Garantiza limpieza de recursos
 

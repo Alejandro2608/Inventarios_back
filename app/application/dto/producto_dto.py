@@ -9,7 +9,7 @@ class ProductoCreateDTO(BaseModel):
         min_length=1,
         max_length=50,
 
-        description="C�digo SKU �nico del producto"
+        description="Codigo SKU unico del producto"
 
     )
 

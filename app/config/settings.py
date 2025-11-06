@@ -1,24 +1,25 @@
+# -*- coding: utf-8 -*-
 from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
     """
-    Configuración de la aplicación.
+    Configuracion de la aplicacion.
 
     RESPONSABILIDAD:
-    - Centralizar todas las variables de configuración
+    - Centralizar todas las variables de configuracion
     - Leer variables de entorno desde .env
     - Proporcionar valores por defecto
 
     PRINCIPIOS APLICADOS:
-    - RA14: Gestión de configuración externa
+    - RA14: Gestion de configuracion externa
     - No hardcodear valores sensibles
     - Facilitar cambio entre entornos (dev, test, prod)
 
     VARIABLES:
-    - database_url: URL de conexión a la base de datos
+    - database_url: URL de conexion a la base de datos
       * SQLite para desarrollo local
-      * PostgreSQL para producción
+      * PostgreSQL para produccion
     """
 
     database_url: str = "sqlite:///inventarios.db"
@@ -27,7 +28,7 @@ class Settings(BaseSettings):
 
     class Config:
         """
-        Configuración de Pydantic Settings.
+        Configuracion de Pydantic Settings.
 
         env_file: Lee variables desde archivo .env
         """
