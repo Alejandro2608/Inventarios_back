@@ -1,167 +1,59 @@
 from abc import ABC, abstractmethod
-from typing import List
+from typing import List, Optional
 from app.domain.entities.producto import Producto
 
 
 class ProductoRepoPort(ABC):
     """
-    Puerto (Interface) que define las operaciones de persistencia.
-
-    Este es un PUERTO SECUNDARIO (salida) de la arquitectura hexagonal.
-
-    �QU� ES UN PUERTO?
-    - Es una interfaz (contrato) que define operaciones
-    - Define QU� se necesita hacer, NO C�MO hacerlo
-    - Pertenece a la capa de DOMINIO
-
-    �POR QU� USAMOS PUERTOS?
-    1. INVERSI�N DE DEPENDENCIAS (SOLID - Principio D):
-       - El dominio define lo que necesita
-       - La infraestructura lo implementa
-       - El dominio NO depende de la infraestructura
-
-    2. FLEXIBILIDAD:
-       - Podemos tener m�ltiples implementaciones:
-         * ProductoRepoSQL (SQLite/PostgreSQL)
-         * ProductoRepoMongo (MongoDB)
-         * ProductoRepoMemory (para pruebas)
-       - Cambiar de BD no afecta al dominio
-
-    3. TESTABILIDAD:
-       - Podemos crear mocks f�cilmente
-       - No necesitamos BD real para probar el dominio
-
-    RELACI�N CON EL PATR�N ADAPTER:
-    - Este puerto es la interfaz que los adaptadores deben implementar
-    - Los adaptadores "adaptan" tecnolog�as externas a este contrato
+    Puerto de repositorio para la entidad Producto.
+    Define las operaciones que cualquier adaptador de persistencia
+    (por ejemplo, PostgreSQL, MongoDB, etc.) debe implementar.
     """
 
+    # Crear producto
     @abstractmethod
     def guardar(self, producto: Producto) -> Producto:
-        """
-        Guarda un producto nuevo en el repositorio.
-
-        RESPONSABILIDAD:
-        - Persistir un producto nuevo
-        - Asignar un ID �nico
-        - Validar que el SKU no exista (RN1)
-
-        Args:
-            producto: Entidad Producto a guardar
-
-        Returns:
-            Producto guardado con su ID asignado
-
-        Raises:
-            ValueError: Si el SKU ya existe (RN1)
-
-        Ejemplo:
-            producto = Producto(sku="RON001", ...)
-            producto_guardado = repo.guardar(producto)
-            print(producto_guardado.id)  # 1
-        """
+        """Guarda un nuevo producto en el repositorio."""
         pass
 
+    # Actualizar producto existente
     @abstractmethod
     def actualizar(self, producto: Producto) -> Producto:
-        """
-        Actualiza un producto existente.
-
-        RESPONSABILIDAD:
-        - Modificar los datos de un producto existente
-        - Actualizar la fecha de modificaci�n
-
-        Args:
-            producto: Entidad Producto con los datos actualizados
-
-        Returns:
-            Producto actualizado
-
-        Raises:
-            ValueError: Si el producto no existe
-
-        Ejemplo:
-            producto.precio_venta = 70000
-            repo.actualizar(producto)
-        """
+        """Actualiza un producto existente."""
         pass
 
+    # Obtener producto por ID
     @abstractmethod
-    def obtener_por_id(self, id: int) -> Producto | None:
-        """
-        Busca un producto por su ID.
-
-        Args:
-            id: ID del producto
-
-        Returns:
-            Producto encontrado o None si no existe
-
-        Ejemplo:
-            producto = repo.buscar_por_id(1)
-            if producto:
-                print(producto.nombre)
-        """
+    def obtener_por_id(self, id: int) -> Optional[Producto]:
+        """Devuelve un producto según su ID, o None si no existe."""
         pass
 
+    # Obtener producto por SKU
     @abstractmethod
-    def obtener_por_sku(self, sku: str) -> Producto | None:
-        """
-        Busca un producto por su SKU.
-
-        IMPORTANCIA:
-        - Usado para validar RN1 (SKU �nico)
-        - Evita duplicados en el inventario
-
-        Args:
-            sku: C�digo SKU del producto
-
-        Returns:
-            Producto encontrado o None si no existe
-
-        Ejemplo:
-            producto = repo.buscar_por_sku("RON001")
-            if producto:
-                print("SKU ya existe")
-        """
+    def obtener_por_sku(self, sku: str) -> Optional[Producto]:
+        """Devuelve un producto según su SKU, o None si no existe."""
         pass
 
+    # Listar todos los productos
     @abstractmethod
     def listar_todos(self) -> List[Producto]:
-        """
-        Lista todos los productos del inventario (RF3).
-
-        RESPONSABILIDAD:
-        - Retornar todos los productos (activos e inactivos)
-        - �til para consultas generales de inventario
-
-        Returns:
-            Lista de todos los productos
-
-        Ejemplo:
-            productos = repo.listar_todos()
-            for p in productos:
-                print(f"{p.sku}: {p.stock} unidades")
-        """
+        """Lista todos los productos registrados."""
         pass
 
+    # Listar solo productos activos
     @abstractmethod
     def listar_activos(self) -> List[Producto]:
-        """
-        Lista solo los productos activos.
+        """Lista únicamente los productos con estado 'Activo'."""
+        pass
 
-        RESPONSABILIDAD:
-        - Retornar solo productos con estado "Activo"
-        - Usado para mostrar productos disponibles para la venta
+    # eliminar producto
+    @abstractmethod
+    def eliminar(self, id: int) -> bool:
+        """Elimina un producto por ID. Devuelve True si fue eliminado."""
+        pass
 
-        REGLA DE NEGOCIO:
-        - RN5: Solo productos activos pueden venderse
-
-        Returns:
-            Lista de productos con estado "Activo"
-
-        Ejemplo:
-            productos_activos = repo.listar_activos()
-            # Solo productos que pueden venderse
-        """
+    # verificar existencia (útil para validaciones)
+    @abstractmethod
+    def existe(self, sku: str) -> bool:
+        """Verifica si existe un producto con el SKU dado."""
         pass

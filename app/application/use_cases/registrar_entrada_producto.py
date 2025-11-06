@@ -4,9 +4,7 @@ from app.application.services.unit_of_work import UnitOfWork
 
 
 class RegistrarEntradaProducto:
-    """
-    Caso de Uso: Registrar Entrada de Producto (RF4)
-    """
+
 
     def __init__(self, producto_repo, movimiento_repo, db):
         self.producto_repo = producto_repo
