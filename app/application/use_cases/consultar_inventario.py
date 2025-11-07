@@ -12,15 +12,24 @@ class ConsultarInventarioUseCase:
     def __init__(self, repo: ProductoRepoPort):
         self.repo = repo
 
-    def ejecutar(self, solo_activos: bool = False) -> List[Producto]:
+    def ejecutar(self, solo_activos: bool = False, page: int = 1, page_size: int = 50) -> tuple[List[Producto], int]:
         """
-        Retorna la lista de productos del inventario.
-        Si `solo_activos` es True, solo devuelve productos activos.
+        Retorna la lista de productos del inventario con paginación (RNF1).
+
+        Args:
+            solo_activos: Si es True, solo devuelve productos activos
+            page: Página actual (1-indexed)
+            page_size: Elementos por página
+
+        Returns:
+            Tupla (productos, total) donde:
+            - productos: Lista de productos de la página actual
+            - total: Total de productos
         """
         if solo_activos:
-            return self.repo.listar_activos()
+            return self.repo.listar_todos(page=page, page_size=page_size, estado="Activo")
         else:
-            return self.repo.listar_todos()
+            return self.repo.listar_todos(page=page, page_size=page_size)
 
     def obtener_por_sku(self, sku: str) -> Optional[Producto]:
         """
@@ -35,7 +44,7 @@ class ConsultarInventarioUseCase:
         if not sku or not sku.strip():
             raise ValueError("El SKU no puede estar vacío")
 
-        producto = self.repo.buscar_por_sku(sku)
+        producto = self.repo.obtener_por_sku(sku)
 
         if not producto:
             # Puedes registrar log o lanzar excepción según tu dominio

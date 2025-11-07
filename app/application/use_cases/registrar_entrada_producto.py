@@ -24,7 +24,7 @@ class RegistrarEntradaProducto:
 
     def execute(self, producto_id: int, cantidad: int, proveedor: str = None, lote: str = None, bodega: str = None):
         """
-        Ejecuta el registro de entrada de producto.
+        Ejecuta el registro de entrada de producto CON TRANSACCIÓN ATÓMICA (RNF6).
 
         Args:
             producto_id: ID del producto
@@ -35,15 +35,24 @@ class RegistrarEntradaProducto:
 
         Raises:
             ValueError: Si el producto no existe
+
+        Transacción:
+            1. Actualiza stock del producto
+            2. Crea movimiento de entrada
+            Si cualquiera falla → ROLLBACK (ambas se revierten)
+            Si ambas OK → COMMIT (ambas se guardan)
         """
         with UnitOfWork(self.db):
+            # 1. Validar que el producto existe
             producto = self.producto_repo.obtener_por_id(producto_id)
             if not producto:
                 raise ValueError("Producto no encontrado")
 
+            # 2. Actualizar stock
             producto.stock += cantidad
             producto.actualizar_stock(producto.stock)  # Valida RN2
 
+            # 3. Crear movimiento
             movimiento = MovimientoInventario(
                 producto_id=producto_id,
                 cantidad=cantidad,
@@ -54,5 +63,8 @@ class RegistrarEntradaProducto:
                 bodega=bodega
             )
 
-            self.movimiento_repo.crear_movimiento(movimiento)
-            self.producto_repo.actualizar(producto)
+            # 4. Guardar cambios (sin commit, lo maneja UnitOfWork)
+            self.movimiento_repo.crear_movimiento(movimiento, auto_commit=False)
+            self.producto_repo.actualizar(producto, auto_commit=False)
+
+            # 5. UnitOfWork hace commit automático al salir del with (RNF6)

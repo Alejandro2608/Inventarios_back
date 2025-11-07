@@ -1,56 +1,62 @@
+# -*- coding: utf-8 -*-
+"""
+DTOs para Productos
+
+Data Transfer Objects para crear, actualizar y consultar productos.
+"""
+
 from pydantic import BaseModel, Field, field_validator
 from datetime import datetime
+from typing import Optional
 
 
-class ProductoCreateDTO(BaseModel):
-
+class RegistrarProductoRequest(BaseModel):
+    """
+    DTO para crear un producto nuevo (RF1).
+    Valida que los datos vengan correctos antes de procesarlos.
+    """
     sku: str = Field(
         ...,
         min_length=1,
         max_length=50,
-
-        description="Codigo SKU unico del producto"
-
+        description="Código SKU único del producto (RN1)"
     )
-
     nombre: str = Field(
         ...,
         min_length=1,
         max_length=200,
         description="Nombre del producto"
     )
-
     tipo_licor: str = Field(
         ...,
+        min_length=1,
+        max_length=100,
         description="Tipo de licor (Ron, Whisky, Vodka, etc.)"
     )
-
     presentacion: str = Field(
         ...,
-
-        description="Presentaci�n del producto (Botella 750ml, Caja x6, etc.)"
-
+        min_length=1,
+        max_length=100,
+        description="Presentación del producto (Botella 750ml, Caja x6, etc.)"
     )
-
     proveedor: str = Field(
         ...,
+        min_length=1,
+        max_length=200,
         description="Nombre del proveedor"
     )
-
     precio_compra: float = Field(
         ...,
         gt=0,
         description="Precio de compra (debe ser mayor a 0)"
     )
-
     precio_venta: float = Field(
         ...,
         gt=0,
         description="Precio de venta (debe ser mayor a 0)"
     )
-
     stock: int = Field(
-        ...,
+        0,
         ge=0,
         description="Stock inicial (debe ser mayor o igual a 0 - RN2)"
     )
@@ -58,7 +64,7 @@ class ProductoCreateDTO(BaseModel):
     @field_validator('sku')
     @classmethod
     def sku_sin_espacios(cls, v: str) -> str:
-     
+        """Valida que el SKU no contenga espacios y lo convierte a mayúsculas."""
         if ' ' in v:
             raise ValueError('El SKU no puede contener espacios')
         return v.upper()
@@ -66,44 +72,46 @@ class ProductoCreateDTO(BaseModel):
     class Config:
         json_schema_extra = {
             "example": {
-                "sku": "RON001",
-
-                "nombre": "Ron Viejo de Caldas 8 A�os",
-
-                "nombre": "Ron Viejo de Caldas 8 A�os",
-
+                "sku": "RON-MEDELLIN-750",
+                "nombre": "Ron Medellín Añejo",
                 "tipo_licor": "Ron",
                 "presentacion": "Botella 750ml",
                 "proveedor": "Licores Nacionales S.A.",
-                "precio_compra": 45000.00,
-                "precio_venta": 65000.00,
+                "precio_compra": 25000.00,
+                "precio_venta": 35000.00,
                 "stock": 100
             }
         }
 
 
-class ProductoUpdateDTO(BaseModel):
-    
-    nombre: str | None = Field(None, min_length=1, max_length=200)
-    tipo_licor: str | None = None
-    presentacion: str | None = None
-    proveedor: str | None = None
-    precio_compra: float | None = Field(None, gt=0)
-    precio_venta: float | None = Field(None, gt=0)
-    stock: int | None = Field(None, ge=0)
-    estado: str | None = Field(None, pattern="^(Activo|Inactivo)$")
+class ActualizarProductoRequest(BaseModel):
+    """
+    DTO para actualizar un producto (RF2).
+    Todos los campos son opcionales para permitir actualización parcial.
+    """
+    nombre: Optional[str] = Field(None, min_length=1, max_length=200)
+    tipo_licor: Optional[str] = Field(None, min_length=1, max_length=100)
+    presentacion: Optional[str] = Field(None, min_length=1, max_length=100)
+    proveedor: Optional[str] = Field(None, min_length=1, max_length=200)
+    precio_compra: Optional[float] = Field(None, gt=0)
+    precio_venta: Optional[float] = Field(None, gt=0)
+    stock: Optional[int] = Field(None, ge=0)
+    estado: Optional[str] = Field(None, pattern="^(Activo|Inactivo)$")
 
     class Config:
         json_schema_extra = {
             "example": {
-                "precio_venta": 70000.00,
-                "stock": 150
+                "precio_venta": 38000.00,
+                "stock": 150,
+                "estado": "Activo"
             }
         }
 
 
-class ProductoResponseDTO(BaseModel):
- 
+class ProductoResponse(BaseModel):
+    """
+    DTO de respuesta - convierte las entidades a JSON para devolverlas al cliente.
+    """
     id: int
     sku: str
     nombre: str
@@ -114,29 +122,20 @@ class ProductoResponseDTO(BaseModel):
     precio_venta: float
     stock: int
     estado: str
-    fecha_creacion: datetime
-    fecha_actualizacion: datetime
 
     class Config:
-
         from_attributes = True
         json_schema_extra = {
             "example": {
                 "id": 1,
-                "sku": "RON001",
-
-                "nombre": "Ron Viejo de Caldas 8 A�os",
-
-                "nombre": "Ron Viejo de Caldas 8 A�os",
-
+                "sku": "RON-MEDELLIN-750",
+                "nombre": "Ron Medellín Añejo",
                 "tipo_licor": "Ron",
                 "presentacion": "Botella 750ml",
                 "proveedor": "Licores Nacionales S.A.",
-                "precio_compra": 45000.00,
-                "precio_venta": 65000.00,
+                "precio_compra": 25000.00,
+                "precio_venta": 35000.00,
                 "stock": 100,
-                "estado": "Activo",
-                "fecha_creacion": "2025-10-30T10:00:00",
-                "fecha_actualizacion": "2025-10-30T10:00:00"
+                "estado": "Activo"
             }
         }
