@@ -26,7 +26,7 @@ class RegistrarSalidaProducto:
 
     def execute(self, producto_id: int, cantidad: int, motivo: str = None, bodega: str = None):
         """
-        Ejecuta el registro de salida de producto.
+        Ejecuta el registro de salida de producto CON TRANSACCIÓN ATÓMICA (RNF6).
 
         Args:
             producto_id: ID del producto
@@ -37,19 +37,29 @@ class RegistrarSalidaProducto:
         Raises:
             ValueError: Si el producto no existe
             ValueError: Si no hay stock suficiente (RN2)
+
+        Transacción:
+            1. Valida stock disponible
+            2. Actualiza stock del producto
+            3. Crea movimiento de salida
+            Si cualquiera falla → ROLLBACK (ambas se revierten)
+            Si ambas OK → COMMIT (ambas se guardan)
         """
         with UnitOfWork(self.db):
+            # 1. Validar que el producto existe
             producto = self.producto_repo.obtener_por_id(producto_id)
             if not producto:
                 raise ValueError("Producto no encontrado")
 
-            # Validar stock disponible (RN2)
+            # 2. Validar stock disponible (RN2)
             if producto.stock < cantidad:
                 raise ValueError(f"Stock insuficiente. Disponible: {producto.stock}, Solicitado: {cantidad} (RN2)")
 
+            # 3. Actualizar stock
             producto.stock -= cantidad
             producto.actualizar_stock(producto.stock)  # Valida RN2
 
+            # 4. Crear movimiento
             movimiento = MovimientoInventario(
                 producto_id=producto_id,
                 cantidad=-cantidad,  # Negativo para salidas
@@ -59,6 +69,9 @@ class RegistrarSalidaProducto:
                 bodega=bodega
             )
 
-            self.movimiento_repo.crear_movimiento(movimiento)
-            self.producto_repo.actualizar(producto)
+            # 5. Guardar cambios (sin commit, lo maneja UnitOfWork)
+            self.movimiento_repo.crear_movimiento(movimiento, auto_commit=False)
+            self.producto_repo.actualizar(producto, auto_commit=False)
+
+            # 6. UnitOfWork hace commit automático al salir del with (RNF6)
 

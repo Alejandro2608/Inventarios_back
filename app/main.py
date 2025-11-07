@@ -2,7 +2,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.config.settings import settings
 from app.infrastructure.db.database import create_db_and_tables
-from app.api.v1 import inventario_routes
+from app.api.v1 import inventario_routes, productos_routes, dashboard_routes
+import webbrowser
+import threading
 
 
 app = FastAPI(
@@ -21,23 +23,27 @@ app.add_middleware(
 )
 
 
+def open_browser():
+    """Abre el navegador con la documentación Swagger después de 1.5 segundos."""
+    import time
+    time.sleep(1.5)
+    webbrowser.open("http://localhost:8000/docs")
+
+
 @app.on_event("startup")
 def on_startup():
     """
     Evento que se ejecuta al iniciar la aplicación.
-
-    RESPONSABILIDAD:
-    - Crear tablas de base de datos si no existen
-    - Inicializar recursos necesarios
-
-    ARQUITECTURA:
-    - Separa la configuración de la lógica de negocio
-    - Usa el patrón de inicialización limpia
+    Inicializa la base de datos y abre el navegador automáticamente.
     """
     print(">> Inicializando sistema de inventarios...")
     create_db_and_tables()
     print(">> Base de datos inicializada")
     print(f">> {settings.app_name} v{settings.app_version} - LISTO")
+    print(">> Abriendo documentación Swagger en el navegador...")
+
+    # Abrir el navegador en un hilo separado
+    threading.Thread(target=open_browser, daemon=True).start()
 
 
 @app.get("/", tags=["Health"])
@@ -62,7 +68,9 @@ def health_check():
 
 
 # Registrar routers de la API v1
+app.include_router(productos_routes.router)
 app.include_router(inventario_routes.router)
+app.include_router(dashboard_routes.router)
 
 
 if __name__ == "__main__":

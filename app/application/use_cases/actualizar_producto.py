@@ -21,7 +21,7 @@ class ActualizarProductoUseCase:
     ) -> Producto:
 
         # Buscar producto existente
-        producto = self.repo.buscar_por_id(id)
+        producto = self.repo.obtener_por_id(id)
         if not producto:
             raise ValueError(f"Producto con ID {id} no encontrado")
 

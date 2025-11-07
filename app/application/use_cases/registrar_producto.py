@@ -46,7 +46,7 @@ class RegistrarProductoUseCase:
             raise ValueError("Stock inválido; debe ser >= 0.")
 
         # RN1: verificar SKU único usando el puerto
-        existente = self.repo.buscar_por_sku(sku)
+        existente = self.repo.obtener_por_sku(sku)
         if existente is not None:
             raise ValueError(f"SKU '{sku}' ya existe.")
 
