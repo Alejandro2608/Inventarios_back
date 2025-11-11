@@ -164,6 +164,20 @@ class Producto:
             self.validar_stock_no_negativo()
             self.fecha_actualizacion = datetime.now()
 
+        # Validar que no sea negativo
+        if nueva_cantidad < 0:
+            raise ValueError("El stock no puede ser negativo")
+
+        # Asignar nuevo stock
+        self.stock = nueva_cantidad
+        self.fecha_actualizacion = datetime.now()
+
+        # 🔹 Ajustar estado automáticamente según el stock
+        if self.stock == 0:
+            self.desactivar()
+        else:
+            self.activar()
+
     def esta_activo(self) -> bool:
         """
         Verifica si el producto esta activo.
