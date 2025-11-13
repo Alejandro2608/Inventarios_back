@@ -55,9 +55,9 @@ class RegistrarSalidaProducto:
             if producto.stock < cantidad:
                 raise ValueError(f"Stock insuficiente. Disponible: {producto.stock}, Solicitado: {cantidad} (RN2)")
 
-            # 3. Actualizar stock
-            producto.stock -= cantidad
-            producto.actualizar_stock(producto.stock)  # Valida RN2
+            # 3. Actualizar stock (el metodo actualizar_stock ya modifica el stock y actualiza el estado)
+            nuevo_stock = producto.stock - cantidad
+            producto.actualizar_stock(nuevo_stock)  # Valida RN2 y actualiza estado automaticamente
 
             # 4. Crear movimiento
             movimiento = MovimientoInventario(

@@ -62,6 +62,13 @@ class RegistrarProductoUseCase:
             stock=stock,
         )
 
+        # Establecer el estado correcto segun el stock inicial
+        # Si stock = 0, el producto debe estar inactivo desde el inicio
+        if stock == 0:
+            producto.estado = "Inactivo"
+        else:
+            producto.estado = "Activo"
+
         # Persistir usando el repositorio (puerto)
         producto_guardado = self.repo.guardar(producto)
 

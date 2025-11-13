@@ -137,6 +137,10 @@ class Producto:
         Este metodo encapsula la logica de actualizacion de stock
         garantizando que se cumpla la regla RN2.
 
+        Automaticamente actualiza el estado del producto:
+        - Si stock = 0: estado pasa a "Inactivo"
+        - Si stock > 0 y estaba "Inactivo": estado pasa a "Activo"
+
         Args:
             nueva_cantidad: Nueva cantidad de stock
 
@@ -146,9 +150,19 @@ class Producto:
         Ejemplo:
             producto.actualizar_stock(50)
             print(producto.stock)  # 50
+
+            producto.actualizar_stock(0)
+            print(producto.estado)  # "Inactivo"
         """
         self.stock = nueva_cantidad
         self.validar_stock_no_negativo()
+
+        # Actualizar estado automaticamente segun el stock
+        if nueva_cantidad == 0:
+            self.estado = "Inactivo"
+        elif nueva_cantidad > 0 and self.estado == "Inactivo":
+            self.estado = "Activo"
+
         self.fecha_actualizacion = datetime.now()
 
     def esta_activo(self) -> bool:
